@@ -1,18 +1,12 @@
+import net from 'net';
+import { CardColor, CardType, CardRarity } from './classes/Card.js';
 import yargs from 'yargs';
-import {hideBin} from 'yargs/helpers';
-import { CardCollectionReader } from './classes/CollectionReader.js';
-import { CardCollection } from './classes/Collection.js';
-import { Card, CardColor, CardRarity, CardType } from './classes/Card.js';
-import { Artefacto, Conjuro, Criatura, Encantamiento, Instantaneo, Planeswalker, Tierra } from './classes/CardTypes.js';
 import chalk from 'chalk';
-import { CardCollectionWriter } from './classes/CollectionWriter.js';
-import { CardCollectionPrinter } from './classes/CollectionPrinter.js';
-import fs from 'fs';
-import path from 'path';
+import {hideBin} from 'yargs/helpers';
+import { CardShape } from './classes/CollectionReader.js';
 
 yargs(hideBin(process.argv))
   .command('add', 'Adds a card to the collection', {
-  
   user: {
       description: 'Username',
       type: 'string',
@@ -77,74 +71,48 @@ yargs(hideBin(process.argv))
     demandOption: false
   }
  }, (argv) => {
-  const reader: CardCollectionReader = new CardCollectionReader(argv.user, (err) => {
-    if(err){
-      throw new Error(err);
-    } else {
-      const collection: CardCollection = new CardCollection(reader.getCollection(), reader.getUser());
-      let card: Card;
-      const cardType: CardType = argv.type as CardType;
-      const cardColor: CardColor = argv.color as CardColor;
-      const cardRarity: CardRarity = argv.rarity as CardRarity;
-      let cardStrength: number = 0;
-      let cardResistance: number = 0;
-      let cardLoyalty: number = 0;
-    
-      if (cardType == CardType.criatura && typeof argv.strength === 'number' && typeof argv.resistance === 'number') {
-        cardStrength = argv.strength;
-        cardResistance = argv.resistance;
-      } else if (cardType === CardType.criatura && !argv.strength) {
-        throw new Error(chalk.red('Stats not found.'));
-      } else if (cardType == CardType.planeswalker && typeof argv.loyalty === 'number') {
-        cardLoyalty = argv.loyalty;
-      } else if (cardType === CardType.planeswalker && !argv.strength) {
-        throw new Error(chalk.red('Stats not found.'));
-      }
-      
-      switch (cardType) {
-        case CardType.tierra:
-          card = new Tierra(argv.id, argv.name, argv.cost, cardColor, cardType, cardRarity, argv.text, argv.price);
-          collection.addCard(card);
-          break;
-    
-        case CardType.encantamiento:
-          card = new Encantamiento(argv.id, argv.name, argv.cost, cardColor, cardType, cardRarity, argv.text, argv.price);
-          collection.addCard(card);
-          break;
-    
-        case CardType.conjuro:
-          card = new Conjuro(argv.id, argv.name, argv.cost, cardColor, cardType, cardRarity, argv.text, argv.price);
-          collection.addCard(card);
-          break;
-    
-        case CardType.instantaneo:
-          console.log("hoola");
-          card = new Instantaneo(argv.id, argv.name, argv.cost, cardColor, cardType, cardRarity, argv.text, argv.price);
-          collection.addCard(card);
-          break;
-    
-        case CardType.artefacto:
-          card = new Artefacto(argv.id, argv.name, argv.cost, cardColor, cardType, cardRarity, argv.text, argv.price);
-          collection.addCard(card);
-          break;
-    
-        case CardType.criatura:
-          card = new Criatura(argv.id, argv.name, argv.cost, cardColor, cardType, cardRarity, argv.text, argv.price, {fuerza: cardStrength, resistencia: cardResistance});
-          collection.addCard(card);
-          break;
-    
-        case CardType.planeswalker:
-          card = new Planeswalker(argv.id, argv.name, argv.cost, cardColor, cardType, cardRarity, argv.text, argv.price, cardLoyalty);
-          collection.addCard(card);
-          break;
-      
-        default:
-          throw new Error(chalk.red('No valid type!'));
-      }
-    
-      const writer: CardCollectionWriter = new CardCollectionWriter(collection);
-      writer.write();
-    }
+  
+  const client = net.connect({port: 60300}, () => {
+    console.log(chalk.green('Connection established.'));
+  });
+
+  const card: CardShape = {
+    ID: argv.id,
+    Name: argv.name,
+    Cost: argv.cost,
+    Color: argv.color,
+    Type: argv.type,
+    Rarity: argv.rarity,
+    Text: argv.text,
+    Price: argv.price,
+    Stats: {
+      fuerza: 0,
+      resistencia: 0
+    },
+    Loyalty: 0
+  }
+
+  if (argv.type == CardType.criatura && typeof argv.strength === 'number' && typeof argv.resistance === 'number') {
+    card.Stats.fuerza = argv.strength;
+    card.Stats.resistencia = argv.resistance;
+  } else if (argv.type === CardType.criatura && !argv.strength) {
+    throw new Error('Stats not found.');
+  } else if (argv.type == CardType.planeswalker && typeof argv.loyalty === 'number') {
+    card.Loyalty = argv.loyalty;
+  } else if (argv.type === CardType.planeswalker && !argv.strength) {
+    throw new Error('Stats not found.');
+  }
+
+  let response = '';
+
+  client.write(JSON.stringify({'requestType': 'add', 'user': argv.user, card}) + '\n');
+
+  client.on('data', (data) => {
+    response += data;
+  })
+
+  client.on('end', () => {
+    console.log(JSON.parse(response));
   });
 
  })
@@ -211,75 +179,38 @@ yargs(hideBin(process.argv))
     demandOption: false
   }
  }, (argv) => {
-  const reader: CardCollectionReader = new CardCollectionReader(argv.user, (err) => {
-    if (err) {
-      throw new Error(err);
-    } else {
-      const collection: CardCollection = new CardCollection(reader.getCollection(), reader.getUser());
-      let card: Card;
-      const cardType: CardType = argv.type as CardType;
-      const cardColor: CardColor = argv.color as CardColor;
-      const cardRarity: CardRarity = argv.rarity as CardRarity;
-      let cardStrength: number = 0;
-      let cardResistance: number = 0;
-      let cardLoyalty: number = 0;
-    
-      if (cardType == CardType.criatura && typeof argv.strength === 'number' && typeof argv.resistance === 'number') {
-        cardStrength = argv.strength;
-        cardResistance = argv.resistance;
-      } else if (cardType === CardType.criatura && !argv.strength) {
-        throw new Error(chalk.red('Stats not found.'));
-      } else if (cardType == CardType.planeswalker && typeof argv.loyalty === 'number') {
-        cardLoyalty = argv.loyalty;
-      } else if (cardType === CardType.planeswalker && !argv.strength) {
-        throw new Error(chalk.red('Stats not found.'));
-      }
-      
-      switch (cardType) {
-        case CardType.tierra:
-          card = new Tierra(argv.id, argv.name, argv.cost, cardColor, cardType, cardRarity, argv.text, argv.price);
-          collection.updateCard(card);
-          break;
-    
-        case CardType.encantamiento:
-          card = new Encantamiento(argv.id, argv.name, argv.cost, cardColor, cardType, cardRarity, argv.text, argv.price);
-          collection.updateCard(card);
-          break;
-    
-        case CardType.conjuro:
-          card = new Conjuro(argv.id, argv.name, argv.cost, cardColor, cardType, cardRarity, argv.text, argv.price);
-          collection.updateCard(card);
-          break;
-    
-        case CardType.instantaneo:
-          card = new Instantaneo(argv.id, argv.name, argv.cost, cardColor, cardType, cardRarity, argv.text, argv.price);
-          collection.updateCard(card);
-          break;
-    
-        case CardType.artefacto:
-          card = new Artefacto(argv.id, argv.name, argv.cost, cardColor, cardType, cardRarity, argv.text, argv.price);
-          collection.updateCard(card);
-          break;
-    
-        case CardType.criatura:
-          card = new Criatura(argv.id, argv.name, argv.cost, cardColor, cardType, cardRarity, argv.text, argv.price, {fuerza: cardStrength, resistencia: cardResistance});
-          collection.updateCard(card);
-          break;
-    
-        case CardType.planeswalker:
-          card = new Planeswalker(argv.id, argv.name, argv.cost, cardColor, cardType, cardRarity, argv.text, argv.price, cardLoyalty);
-          collection.updateCard(card);
-          break;
-      
-        default:
-          throw new Error(chalk.red('No valid type!'));
-      }
-    
-      const writer: CardCollectionWriter = new CardCollectionWriter(collection);
-      writer.write();
-    }
+  const client = net.connect({port: 60300}, () => {
+    console.log(chalk.green('Connection established.'));
   });
 
+  const card: CardShape = {
+    ID: argv.id,
+    Name: argv.name,
+    Cost: argv.cost,
+    Color: argv.color,
+    Type: argv.type,
+    Rarity: argv.rarity,
+    Text: argv.text,
+    Price: argv.price,
+    Stats: {
+      fuerza: 0,
+      resistencia: 0
+    },
+    Loyalty: 0
+  }
+
+  if (argv.type == CardType.criatura && typeof argv.strength === 'number' && typeof argv.resistance === 'number') {
+    card.Stats.fuerza = argv.strength;
+    card.Stats.resistencia = argv.resistance;
+  } else if (argv.type === CardType.criatura && !argv.strength) {
+    throw new Error('Stats not found.');
+  } else if (argv.type == CardType.planeswalker && typeof argv.loyalty === 'number') {
+    card.Loyalty = argv.loyalty;
+  } else if (argv.type === CardType.planeswalker && !argv.strength) {
+    throw new Error('Stats not found.');
+  }
+
+  client.write(JSON.stringify({'requestType': 'update', 'user': argv.user, card}) + '\n');
  })
  .command('remove', 'Removes a card from the collection', {
   
@@ -294,16 +225,11 @@ yargs(hideBin(process.argv))
    demandOption: true
   }
  }, (argv) => {
-  const reader: CardCollectionReader = new CardCollectionReader(argv.user, (err) => {
-    if (err) {
-      throw new Error(err);
-    } else {
-      const collection: CardCollection = new CardCollection(reader.getCollection(), reader.getUser());
-      collection.deleteCard(argv.id);
-      const writer: CardCollectionWriter = new CardCollectionWriter(collection);
-      writer.write();
-    }
+  const client = net.connect({port: 60300}, () => {
+    console.log(chalk.green('Connection established.'));
   });
+
+  client.write(JSON.stringify({'requestType': 'remove', 'user': argv.user,'id': argv.id}) + '\n');
 
  })
  .command('list', 'Lists the cards from the collection', {
@@ -314,16 +240,11 @@ yargs(hideBin(process.argv))
     demandOption: true
   }
  }, (argv) => {
-  const reader: CardCollectionReader = new CardCollectionReader(argv.user, (err) => {
-    if (err) {
-      throw new Error(err);
-    } else {
-      const collection: CardCollection = new CardCollection(reader.getCollection(), reader.getUser());
-      const printer: CardCollectionPrinter = new CardCollectionPrinter(collection);
-      printer.print();
-    }
+  const client = net.connect({port: 60300}, () => {
+    console.log(chalk.green('Connection established.'));
   });
 
+  client.write(JSON.stringify({'requestType': 'list', 'user': argv.user}) + '\n');
  })
  .command('read', 'Reads a card from the collection', {
   
@@ -338,14 +259,11 @@ yargs(hideBin(process.argv))
    demandOption: true
   }
  }, (argv) => {
-  const reader: CardCollectionReader = new CardCollectionReader(argv.user, (err) => {
-    if(err){
-      throw new Error(err);
-    } else {
-      const collection: CardCollection = new CardCollection(reader.getCollection(), reader.getUser());
-      collection.showCard(argv.id);
-    }
+  const client = net.connect({port: 60300}, () => {
+    console.log(chalk.green('Connection established.'));
   });
+
+  client.write(JSON.stringify({'requestType': 'read', 'user': argv.user,'id': argv.id}) + '\n');
  })
  .command('addUser', 'Adds a user to the server', {
   
@@ -355,22 +273,11 @@ yargs(hideBin(process.argv))
     demandOption: true
   }
  }, (argv) => {
-  const __dirname = path.dirname(new URL(import.meta.url).pathname);
-  const sourcedir = path.resolve(__dirname, '..');
-  const route = path.join(sourcedir, `src/database/users/${argv.user}`);
-  fs.access(route, (err) => {
-    if(!err){
-      throw new Error('Usuario ya existe');
-    } else {
-      fs.mkdir(route, {recursive: true}, (err) => {
-        if(err){
-          throw new Error(err.message);
-        } else {
-          console.log(chalk.green('Usuario creado correctamente!'));
-        }
-      });
-    }
+  const client = net.connect({port: 60300}, () => {
+    console.log(chalk.green('Connection established.'));
   });
+
+  client.write(JSON.stringify({'requestType': 'addUser', 'user': argv.user}) + '\n');
  })
  
  .help()
