@@ -52,19 +52,23 @@ export class CardCollectionReader  {
       if (err) {
         callback(err.message, undefined);
       } else {
-        let cardCount = 0;
-        cards.forEach((card) => {
-          fs.readFile(`${this.route}/${card}`, 'utf-8', (err, content) => {
-            const data: CardShape = JSON.parse(content);
-            const reader: CardReader = new CardReader(data);
-      
-            this.collection.push(reader.returnCard());
-            cardCount++;
-            if(cardCount === cards.length) {
-              callback(undefined, 0)
-            }
+        if(cards.length == 0) {
+          callback(undefined, 0);
+        } else {
+          let cardCount = 0;
+          cards.forEach((card) => {
+            fs.readFile(`${this.route}/${card}`, 'utf-8', (err, content) => {
+              const data: CardShape = JSON.parse(content);
+              const reader: CardReader = new CardReader(data);
+        
+              this.collection.push(reader.returnCard());
+              cardCount++;
+              if(cardCount === cards.length) {
+                callback(undefined, 0)
+              }
+            });
           });
-        });
+        }
       } 
     });
 

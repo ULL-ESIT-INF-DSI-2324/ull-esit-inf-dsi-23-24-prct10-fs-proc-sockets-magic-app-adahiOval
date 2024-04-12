@@ -7,6 +7,8 @@ import { Artefacto, Conjuro, Criatura, Encantamiento, Instantaneo, Planeswalker,
 import chalk from 'chalk';
 import { CardCollectionWriter } from './classes/CollectionWriter.js';
 import { CardCollectionPrinter } from './classes/CollectionPrinter.js';
+import fs from 'fs';
+import path from 'path';
 
 yargs(hideBin(process.argv))
   .command('add', 'Adds a card to the collection', {
@@ -116,6 +118,7 @@ yargs(hideBin(process.argv))
           break;
     
         case CardType.instantaneo:
+          console.log("hoola");
           card = new Instantaneo(argv.id, argv.name, argv.cost, cardColor, cardType, cardRarity, argv.text, argv.price);
           collection.addCard(card);
           break;
@@ -341,6 +344,31 @@ yargs(hideBin(process.argv))
     } else {
       const collection: CardCollection = new CardCollection(reader.getCollection(), reader.getUser());
       collection.showCard(argv.id);
+    }
+  });
+ })
+ .command('addUser', 'Adds a user to the server', {
+  
+  user: {
+    description: 'Username',
+    type: 'string',
+    demandOption: true
+  }
+ }, (argv) => {
+  const __dirname = path.dirname(new URL(import.meta.url).pathname);
+  const sourcedir = path.resolve(__dirname, '..');
+  const route = path.join(sourcedir, `src/database/users/${argv.user}`);
+  fs.access(route, (err) => {
+    if(!err){
+      throw new Error('Usuario ya existe');
+    } else {
+      fs.mkdir(route, {recursive: true}, (err) => {
+        if(err){
+          throw new Error(err.message);
+        } else {
+          console.log(chalk.green('Usuario creado correctamente!'));
+        }
+      });
     }
   });
  })
