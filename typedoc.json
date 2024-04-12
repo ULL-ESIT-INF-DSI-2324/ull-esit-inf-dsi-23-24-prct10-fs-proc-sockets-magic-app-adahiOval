@@ -1,0 +1,13 @@
+{
+  "entryPoints": [
+    "./src/classes/Card.ts",
+    "./src/classes/CardReader.ts",
+    "./src/classes/CardTypes.ts",
+    "./src/classes/Collection.ts",
+    "./src/classes/CollectionPrinter.ts",
+    "./src/classes/CollectionReader.ts",
+    "./src/classes/CollectionWriter.ts",
+  ],
+
+  "out": "./docs"
+}
