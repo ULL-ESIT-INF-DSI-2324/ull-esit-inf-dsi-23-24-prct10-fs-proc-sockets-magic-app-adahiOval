@@ -17,11 +17,63 @@ export class CardCollectionWriter {
     this.route = path.join(fatherdir, `src/database/users/${this.collection.user}`);
   }
 
+  clean(callback: (err: string | undefined) => void): void {
+    fs.readdir(this.route, (err, files) => {
+      if (err) {
+        throw new Error(err.message);
+      } else {
+        if(files.length == 0) {
+          callback(undefined);
+        } else {
+          let fileCount = 0;
+          files.forEach((file) => {
+            const filePath: string = path.join(this.route, file);
+            fs.unlink(filePath, (err) => {
+              if (err) {
+                throw new Error(err.message);
+              } else {
+                fileCount++;
+                if(fileCount === files.length) {
+                  callback(undefined);
+                }
+              }
+            });
+          });
+        }
+      }
+    });
+  }
+
   write(): void {
-    const files: string[] = fs.readdirSync(this.route);
-    files.forEach((file) => {
-      const filePath: string = path.join(this.route, file);
-      fs.unlinkSync(filePath);
+    this.clean((err) => {
+      if(err){
+        throw new Error(err);
+      } else {
+        this.collection.collection.forEach((card) => {
+          const cardPath: string = path.join(this.route, `${card.name}.json`);
+          fs.writeFile(cardPath, JSON.stringify(card), (err) => {
+            if (err) {
+              throw new Error(err.message);
+            }
+          });
+        });
+      } 
+    });
+  }
+
+  /*
+      write(): void {
+    fs.readdir(this.route, (err, files) => {
+      files.forEach((file) => {
+        const filePath: string = path.join(this.route, file);
+        fs.unlink(filePath, (err) => {
+          if(err){
+            throw new Error(err.message);
+          } else {
+            
+          }
+        });
+      });
     });
 
     this.collection.collection.forEach((card) => {
@@ -30,4 +82,5 @@ export class CardCollectionWriter {
     });
 
   }
+  */
 }

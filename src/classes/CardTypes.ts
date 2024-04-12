@@ -112,8 +112,8 @@ export class Criatura extends Card {
     console.log(chalk.white(chalk.bold.underline('Rarity:') + ` ${this.rarity}`));
     console.log(chalk.white(chalk.bold.underline('Text:') + ` ${this.text}`));
     console.log(chalk.white(chalk.bold.underline('Price:') + ` ${this.price}`));
-    console.log(chalk.white(chalk.bold.underline('Strength: ') + `${this.stats.fuerza}`));
-    console.log(chalk.white(chalk.bold.underline('Resistance: ') + `${this.stats.resistencia}`));
+    console.log(chalk.white(chalk.bold.underline('Strength:') + ` ${this.stats.fuerza}`));
+    console.log(chalk.white(chalk.bold.underline('Resistance:') + ` ${this.stats.resistencia}`));
 
     console.log(chalk.grey.bold('-'.repeat(50)));
   }
@@ -177,7 +177,7 @@ export class Planeswalker extends Card {
     console.log(chalk.white(chalk.bold.underline('Rarity:') + ` ${this.rarity}`));
     console.log(chalk.white(chalk.bold.underline('Text:') + ` ${this.text}`));
     console.log(chalk.white(chalk.bold.underline('Price:') + ` ${this.price}`));
-    console.log(chalk.white(chalk.bold.underline('Loyalty: ') + `${this.loyalty}`));
+    console.log(chalk.white(chalk.bold.underline('Loyalty:') + ` ${this.loyalty}`));
 
     console.log(chalk.grey.bold('-'.repeat(50)));
   }
