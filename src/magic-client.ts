@@ -109,10 +109,14 @@ yargs(hideBin(process.argv))
 
   client.on('data', (data) => {
     response += data;
-  })
+  });
 
   client.on('end', () => {
-    console.log(JSON.parse(response));
+    if(JSON.parse(response).success) {
+      console.log(chalk.green(chalk.underline(JSON.parse(response).message)));
+    } else {
+      console.log(chalk.red(chalk.underline(JSON.parse(response).message)));
+    }
   });
 
  })
@@ -211,6 +215,21 @@ yargs(hideBin(process.argv))
   }
 
   client.write(JSON.stringify({'requestType': 'update', 'user': argv.user, card}) + '\n');
+
+  let response = '';
+
+  client.on('data', (data) => {
+    response += data;
+  });
+
+  client.on('end', () => {
+    if(JSON.parse(response).success) {
+      console.log(chalk.green(chalk.underline(JSON.parse(response).message)));
+    } else {
+      console.log(chalk.red(chalk.underline(JSON.parse(response).message)));
+    }
+  });
+
  })
  .command('remove', 'Removes a card from the collection', {
   
@@ -231,6 +250,20 @@ yargs(hideBin(process.argv))
 
   client.write(JSON.stringify({'requestType': 'remove', 'user': argv.user,'id': argv.id}) + '\n');
 
+  let response = '';
+
+  client.on('data', (data) => {
+    response += data;
+  });
+
+  client.on('end', () => {
+    if(JSON.parse(response).success) {
+      console.log(chalk.green(chalk.underline(JSON.parse(response).message)));
+    } else {
+      console.log(chalk.red(chalk.underline(JSON.parse(response).message)));
+    }
+  });
+
  })
  .command('list', 'Lists the cards from the collection', {
   
@@ -245,6 +278,73 @@ yargs(hideBin(process.argv))
   });
 
   client.write(JSON.stringify({'requestType': 'list', 'user': argv.user}) + '\n');
+
+  let response = '';
+
+  client.on('data', (data) => {
+    response += data;
+  });
+
+  client.on('end', () => {
+    console.log(chalk.bold.blue(`${argv.user} collection`))
+    console.log(chalk.grey.bold('-'.repeat(50)));
+    const cards: CardShape[] = JSON.parse(response).cards;
+    cards.forEach(card => {
+      console.log(chalk.white(chalk.bold.underline('ID:') + ` ${card.ID}`));
+      console.log(chalk.white(chalk.bold.underline('Name:') + ` ${card.Name}`));
+      console.log(chalk.white(chalk.bold.underline('Cost:') + ` ${card.Cost}`));
+  
+      switch (card.Color) {
+        case CardColor.azul:
+          console.log(chalk.white(chalk.bold.underline('Color:') + chalk.bold.blue(` ${card.Color}`)));
+          break;
+  
+        case CardColor.blanco:
+          console.log(chalk.white(chalk.bold.underline('Color:') + chalk.bold.white(` ${card.Color}`)));
+          break;
+  
+        case CardColor.negro:
+          console.log(chalk.white(chalk.bold.underline('Color:') + chalk.bold.blackBright(` ${card.Color}`)));
+          break;
+  
+        case CardColor.rojo:
+          console.log(chalk.white(chalk.bold.underline('Color:') + chalk.bold.red(` ${card.Color}`)));
+          break;
+      
+        case CardColor.verde:
+          console.log(chalk.white(chalk.bold.underline('Color:') + chalk.bold.green(` ${card.Color}`)));
+          break;
+      
+        case CardColor.incoloro:
+          console.log(chalk.white(chalk.bold.underline('Color:') + chalk.bold.whiteBright(` ${card.Color}`)));
+          break;
+  
+        case CardColor.multicolor:
+          console.log(chalk.white(chalk.bold.underline('Color:') + chalk.bold.bgYellowBright(` ${card.Color}`)));
+          break;
+  
+        default:
+          break;
+      }
+  
+      console.log(chalk.white(chalk.bold.underline('Type:') + ` ${card.Type}`));
+      console.log(chalk.white(chalk.bold.underline('Rarity:') + ` ${card.Rarity}`));
+      console.log(chalk.white(chalk.bold.underline('Text:') + ` ${card.Text}`));
+      console.log(chalk.white(chalk.bold.underline('Price:') + ` ${card.Price}`));
+
+      if(card.Stats) {
+        console.log(chalk.white(chalk.bold.underline('Fuerza:') + ` ${card.Stats.fuerza}`));
+        console.log(chalk.white(chalk.bold.underline('Resistencia:') + ` ${card.Stats.resistencia}`));
+      }
+
+      if(card.Loyalty) {
+        console.log(chalk.white(chalk.bold.underline('Loyalty:') + ` ${card.Loyalty}`));
+      }
+  
+      console.log(chalk.grey.bold('-'.repeat(50)));
+    });
+  });
+
  })
  .command('read', 'Reads a card from the collection', {
   
@@ -264,6 +364,73 @@ yargs(hideBin(process.argv))
   });
 
   client.write(JSON.stringify({'requestType': 'read', 'user': argv.user,'id': argv.id}) + '\n');
+
+  let response = '';
+
+  client.on('data', (data) => {
+    response += data;
+  });
+
+  client.on('end', () => {
+    const card: CardShape = JSON.parse(response).card;
+    if(card) {
+      console.log(chalk.white(chalk.bold.underline('ID:') + ` ${card.ID}`));
+      console.log(chalk.white(chalk.bold.underline('Name:') + ` ${card.Name}`));
+      console.log(chalk.white(chalk.bold.underline('Cost:') + ` ${card.Cost}`));
+  
+      switch (card.Color) {
+        case CardColor.azul:
+          console.log(chalk.white(chalk.bold.underline('Color:') + chalk.bold.blue(` ${card.Color}`)));
+          break;
+  
+        case CardColor.blanco:
+          console.log(chalk.white(chalk.bold.underline('Color:') + chalk.bold.white(` ${card.Color}`)));
+          break;
+  
+        case CardColor.negro:
+          console.log(chalk.white(chalk.bold.underline('Color:') + chalk.bold.blackBright(` ${card.Color}`)));
+          break;
+  
+        case CardColor.rojo:
+          console.log(chalk.white(chalk.bold.underline('Color:') + chalk.bold.red(` ${card.Color}`)));
+          break;
+      
+        case CardColor.verde:
+          console.log(chalk.white(chalk.bold.underline('Color:') + chalk.bold.green(` ${card.Color}`)));
+          break;
+      
+        case CardColor.incoloro:
+          console.log(chalk.white(chalk.bold.underline('Color:') + chalk.bold.whiteBright(` ${card.Color}`)));
+          break;
+  
+        case CardColor.multicolor:
+          console.log(chalk.white(chalk.bold.underline('Color:') + chalk.bold.bgYellowBright(` ${card.Color}`)));
+          break;
+  
+        default:
+          break;
+      }
+  
+      console.log(chalk.white(chalk.bold.underline('Type:') + ` ${card.Type}`));
+      console.log(chalk.white(chalk.bold.underline('Rarity:') + ` ${card.Rarity}`));
+      console.log(chalk.white(chalk.bold.underline('Text:') + ` ${card.Text}`));
+      console.log(chalk.white(chalk.bold.underline('Price:') + ` ${card.Price}`));
+
+      if(card.Stats) {
+        console.log(chalk.white(chalk.bold.underline('Fuerza:') + ` ${card.Stats.fuerza}`));
+        console.log(chalk.white(chalk.bold.underline('Resistencia:') + ` ${card.Stats.resistencia}`));
+      }
+
+      if(card.Loyalty) {
+        console.log(chalk.white(chalk.bold.underline('Loyalty:') + ` ${card.Loyalty}`));
+      }
+  
+      console.log(chalk.grey.bold('-'.repeat(50)));
+    } else {
+      console.log(chalk.red('Card not found!'));
+    }
+  });
+
  })
  .command('addUser', 'Adds a user to the server', {
   
@@ -278,6 +445,21 @@ yargs(hideBin(process.argv))
   });
 
   client.write(JSON.stringify({'requestType': 'addUser', 'user': argv.user}) + '\n');
+
+  let response = '';
+
+  client.on('data', (data) => {
+    response += data;
+  });
+
+  client.on('end', () => {
+    if (JSON.parse(response).success) {
+      console.log(chalk.green(JSON.parse(response).message));
+    } else {
+      console.log(chalk.red(JSON.parse(response).message));
+    }
+  });
+
  })
  
  .help()

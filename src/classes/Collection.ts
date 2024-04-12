@@ -14,34 +14,33 @@ export class CardCollection {
 
     if (this.inCollection(id)) {
       this.collection = this.collection.filter((element) => element.id !== id);
-      console.log(chalk.green(`Card with ID: ${id} removed from the collection!`));
+      return 'Card removed from the collection!';
     } else {
       console.log(chalk.red('Card not in the collection!'));
-      throw new Error('Card not found');
+      return 'Card not found';
     }
 
   }
 
-  addCard(card: Card): void {
+  addCard(card: Card): string {
 
     if (this.inCollection(card.id)) {
-      console.log(chalk.red('Card already exists in this collection!'));
-      throw new Error('Card already in collection');
+      return 'Card already in collection';
     } else {
       this.collection.push(card);
-      console.log(chalk.green('New card added to the collection!'));
+      return 'New card added to the collection!';
     }
 
   }
 
-  updateCard(card: Card): void {
+  updateCard(card: Card): string {
 
     if (this.inCollection(card.id)) {
       this.deleteCard(card.id);
       this.collection.push(card);
-      console.log(chalk.green('Card updated in the collection!'));
+      return 'Card updated in the collection!';
     } else {
-      throw new Error(chalk.red('Card doesnt exist in this collection!'));
+      return 'Card doesnt exist in this collection!';
     }
 
   }
@@ -54,11 +53,16 @@ export class CardCollection {
     printer.print();
   }
 
-  showCard(id: number): void {
+  showCard(id: number): Card | undefined {
     if (this.inCollection(id)) {
-      this.collection.find((card) => card.id === id)?.print();
+      return this.collection.find((card) => card.id === id)!;
     } else {
-      throw new Error(chalk.red('Card not found!'));
+      return undefined;
     }
   }
+
+  getCards(): Card[] {
+    return this.collection;
+  }
+
 }
