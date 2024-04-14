@@ -28,6 +28,7 @@ export class CardCollectionReader  {
   /**
    * El constructor de la clase, se encarga de crear la ruta hasta el directorio del usuario dado
    * @param user El usuario del que se crea el objeto colección
+   * @param callback Función callback para que el código asincrono funcione correctamente al iniciar el objeto
    */
   constructor(private user: string, callback: (err: string | undefined) => void) {
     const __dirname = path.dirname(new URL(import.meta.url).pathname);
@@ -44,7 +45,8 @@ export class CardCollectionReader  {
   }
 
   /**
-   * Método para leer el directorio de un usuario concreto.
+   * Método para leer el directorio de un usuario concreto, asincrono.
+   * @param callback La funcion callback que se ejecutará cuando se la llame dentro de la función
    */
   readDir(callback: (err: string | undefined, success: number | undefined) => void): void {
 

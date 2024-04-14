@@ -1,5 +1,8 @@
 import {EventEmitter} from 'events';
 
+/**
+ * Clase para un server basada en las plantillas EventEmitter de los apuntes de la asignatura. Con ella se puede saber cuando un mensaje ha sido recibido por completo.
+ */
 export class EventEmitterServer extends EventEmitter {
   constructor(public connection: EventEmitter) {
     super();

@@ -9,6 +9,9 @@ import { CardCollectionWriter } from './classes/CollectionWriter.js';
 import fs from 'fs';
 import path from 'path';
 
+/**
+ * Programa principal del lado del server, recibe los JSON del cliente, se procesa la request y se accede al sistema de archivos según el tipo de operación que se pida, y le devuelve al cliente un JSON con un atributo success(true o false) y un string de respuesta, satisfactoria o no.
+ */
 net.createServer((connection) => {
   console.log(chalk.green('A client has connected.'));
   const server = new EventEmitterServer(connection);

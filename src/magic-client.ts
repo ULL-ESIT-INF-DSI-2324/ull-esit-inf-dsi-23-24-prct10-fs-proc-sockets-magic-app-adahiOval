@@ -5,6 +5,9 @@ import chalk from 'chalk';
 import {hideBin} from 'yargs/helpers';
 import { CardShape } from './classes/CollectionReader.js';
 
+/**
+ * Programa principal del lado del cliente, cada comando se encarga de enviar un JSON por el socket con el tipo de request que le está haciendo al server (add, update, remove...) además de la información asociada a ese tipo de request, por ejemplo para add manda un atributo 'card' en el JSON con los datos de la carta.
+ */
 yargs(hideBin(process.argv))
   .command('add', 'Adds a card to the collection', {
   user: {
